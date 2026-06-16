@@ -24,6 +24,8 @@ public class ProductController {
     @PostMapping()
     public ResponseEntity<ProductResponse> addProduct(@RequestBody CreateProductRequest createProductRequest) {
         Product product = productMapper.productRequestToProduct(createProductRequest);
+        product.getWholesalePriceTiers().forEach(tier -> tier.setProduct(product));
+        product.getCommissionRule().setProduct(product);
         productService.save(product);
         return ResponseEntity.ok(productMapper.productToProductResponse(product));
     }
@@ -33,5 +35,19 @@ public class ProductController {
         List<Product> products = productService.findAll();
         List<ProductResponse> productResponses = products.stream().map(productMapper::productToProductResponse).toList();
         return ResponseEntity.ok(productResponses);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getProductById(@PathVariable Long id) {
+        return productService.findById(id).map(
+                product -> ResponseEntity.ok(
+                        productMapper.productToProductResponse(product))).orElse(ResponseEntity.notFound().build()
+        );
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
+        productService.deleteById(id);
+        return ResponseEntity.ok().build();
     }
 }

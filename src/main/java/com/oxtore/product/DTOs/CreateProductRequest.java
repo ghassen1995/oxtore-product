@@ -14,7 +14,7 @@ public record CreateProductRequest(
         BigDecimal retailPrice,
         Integer availableStock,
         UnitOfSale unitOfSale,
-        Long commissionRuleId,
+        CommissionRuleRequest commissionRule,
         List<ProductImageRequest> images,
         List<WholesalePriceTierRequest> wholesalePriceTiers,
         ProductStatus status

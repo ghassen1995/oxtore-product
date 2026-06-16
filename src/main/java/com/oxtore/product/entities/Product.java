@@ -64,7 +64,7 @@ public class Product {
     @Column(nullable = false)
     private ProductStatus status;
 
-    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private CommissionRule commissionRule;
 
     @Column(name = "created_at", updatable = false)
