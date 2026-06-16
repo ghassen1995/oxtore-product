@@ -25,7 +25,9 @@ public class ProductController {
     public ResponseEntity<ProductResponse> addProduct(@RequestBody CreateProductRequest createProductRequest) {
         Product product = productMapper.productRequestToProduct(createProductRequest);
         product.getWholesalePriceTiers().forEach(tier -> tier.setProduct(product));
-        product.getCommissionRule().setProduct(product);
+        if(createProductRequest.commissionRule() != null) {
+            product.getCommissionRule().setProduct(product);
+        }
         productService.save(product);
         return ResponseEntity.ok(productMapper.productToProductResponse(product));
     }

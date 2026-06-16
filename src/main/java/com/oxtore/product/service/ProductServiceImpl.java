@@ -3,6 +3,10 @@ package com.oxtore.product.service;
 import com.oxtore.product.entities.Product;
 import com.oxtore.product.enums.SaleType;
 import com.oxtore.product.enums.TransactionMode;
+import com.oxtore.product.exceptions.CommissionRuleNotAllowedException;
+import com.oxtore.product.exceptions.MarketPriceNotAllowedException;
+import com.oxtore.product.exceptions.WholeSaleIsEmptyException;
+import com.oxtore.product.exceptions.WholeSaleIsNotAllowedException;
 import com.oxtore.product.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +30,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         if (product.getSaleType() != SaleType.WHOLESALE && product.getMarketPrice() != null) {
-            throw new RuntimeException("Market price is not allowed, sale type must be WHOLESALE");
+            throw new MarketPriceNotAllowedException();
         }
 
         if (product.getCommissionRule() != null) {
@@ -34,15 +38,22 @@ public class ProductServiceImpl implements ProductService {
                     && product.getTransactionMode() == TransactionMode.CONSIGNMENT;
 
             if (!isAllowed) {
-                throw new RuntimeException(
-                        "Commission rule is not allowed. It is only permitted when SaleType=WHOLESALE and TransactionMode=CONSIGNMENT"
-                );
+                throw new CommissionRuleNotAllowedException();
             }
+        }
+
+        if (product.getSaleType() == SaleType.WHOLESALE && product.getWholesalePriceTiers().isEmpty()) {
+            throw new WholeSaleIsEmptyException();
+        }
+
+        if (product.getSaleType() == SaleType.RETAIL && !product.getWholesalePriceTiers().isEmpty()) {
+            throw new WholeSaleIsNotAllowedException();
         }
 
         return productRepository.save(product);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Product> findAll() {
         return productRepository.findAll();
