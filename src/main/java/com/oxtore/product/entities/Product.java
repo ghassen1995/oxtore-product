@@ -37,6 +37,8 @@ public class Product {
     @Column(name = "product_name", nullable = false, length = 100)
     private String productName;
 
+    @Column(name = "store_id", nullable = false)
+    private Long storeId;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @Builder.Default

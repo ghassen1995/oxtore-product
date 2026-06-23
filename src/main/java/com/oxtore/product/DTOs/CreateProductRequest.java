@@ -17,6 +17,7 @@ public record CreateProductRequest(
         CommissionRuleRequest commissionRule,
         List<ProductImageRequest> images,
         List<WholesalePriceTierRequest> wholesalePriceTiers,
-        ProductStatus status
+        ProductStatus status,
+        Long storeId
 ) {
 }

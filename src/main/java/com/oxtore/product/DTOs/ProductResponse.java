@@ -21,5 +21,6 @@ public record ProductResponse(
         ProductStatus status,
         CommissionRuleResponse commissionRule,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt) {
+        LocalDateTime updatedAt,
+        Long storeId) {
 }

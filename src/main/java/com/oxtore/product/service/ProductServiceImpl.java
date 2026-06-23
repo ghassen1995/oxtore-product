@@ -1,5 +1,6 @@
 package com.oxtore.product.service;
 
+import com.oxtore.product.DTOs.ProductCreatedEvent;
 import com.oxtore.product.entities.Product;
 import com.oxtore.product.enums.SaleType;
 import com.oxtore.product.enums.TransactionMode;
@@ -7,6 +8,7 @@ import com.oxtore.product.exceptions.CommissionRuleNotAllowedException;
 import com.oxtore.product.exceptions.MarketPriceNotAllowedException;
 import com.oxtore.product.exceptions.WholeSaleIsEmptyException;
 import com.oxtore.product.exceptions.WholeSaleIsNotAllowedException;
+import com.oxtore.product.kafka.ProductEventPublisher;
 import com.oxtore.product.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,9 +19,11 @@ import java.util.Optional;
 @Service
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
+    private final ProductEventPublisher productEventPublisher;
 
-    public ProductServiceImpl(ProductRepository productRepository) {
+    public ProductServiceImpl(ProductRepository productRepository, ProductEventPublisher productEventPublisher) {
         this.productRepository = productRepository;
+        this.productEventPublisher = productEventPublisher;
     }
 
     @Override
@@ -50,7 +54,10 @@ public class ProductServiceImpl implements ProductService {
             throw new WholeSaleIsNotAllowedException();
         }
 
-        return productRepository.save(product);
+        Product savedProduct = productRepository.save(product);
+
+        productEventPublisher.publishProductCreated(new ProductCreatedEvent(savedProduct.getId(), savedProduct.getStoreId(), savedProduct.getAvailableStock(), savedProduct.getSaleType(), savedProduct.getTransactionMode(), savedProduct.getCreatedAt()));
+        return savedProduct;
     }
 
     @Transactional(readOnly = true)
